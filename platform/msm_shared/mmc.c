@@ -2127,10 +2127,8 @@ unsigned int mmc_boot_main(unsigned char slot, unsigned int base)
 {
 	unsigned int mmc_ret = MMC_BOOT_E_SUCCESS;
 
-	memset((struct mmc_boot_host *)&mmc_host, 0,
-	       sizeof(struct mmc_boot_host));
-	memset((struct mmc_boot_card *)&mmc_card, 0,
-	       sizeof(struct mmc_boot_card));
+	memset((struct mmc_boot_host *)&mmc_host, 0, sizeof(struct mmc_boot_host));
+	memset((struct mmc_boot_card *)&mmc_card, 0, sizeof(struct mmc_boot_card));
 
 	mmc_slot = slot;
 	mmc_boot_mci_base = base;
@@ -2138,16 +2136,17 @@ unsigned int mmc_boot_main(unsigned char slot, unsigned int base)
 	/* Initialize necessary data structure and enable/set clock and power */
 	dprintf(SPEW, " Initializing MMC host data structure and clock!\n");
 	mmc_ret = mmc_boot_init(&mmc_host);
-	if (mmc_ret != MMC_BOOT_E_SUCCESS) {
+	if (mmc_ret != MMC_BOOT_E_SUCCESS) 
+	{
 		dprintf(CRITICAL, "MMC Boot: Error Initializing MMC Card!!!\n");
 		return MMC_BOOT_E_FAILURE;
 	}
 
 	/* Initialize and identify cards connected to host */
 	mmc_ret = mmc_boot_init_and_identify_cards(&mmc_host, &mmc_card);
-	if (mmc_ret != MMC_BOOT_E_SUCCESS) {
-		dprintf(CRITICAL,
-			"MMC Boot: Failed detecting MMC/SDC @ slot%d\n", slot);
+	if (mmc_ret != MMC_BOOT_E_SUCCESS) 
+	{
+		dprintf(CRITICAL, "MMC Boot: Failed detecting MMC/SDC @ slot%d\n", slot);
 		return MMC_BOOT_E_FAILURE;
 	}
 

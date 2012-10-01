@@ -49,6 +49,8 @@
 #include <platform.h>
 #include <crypto_hash.h>
 
+#include <platform/iomap.h>
+
 #if DEVICE_TREE
 #include <libfdt.h>
 #endif
@@ -1462,6 +1464,7 @@ void aboot_init(const struct app_descriptor *app)
 	unsigned reboot_mode = 0;
 	unsigned usb_init = 0;
 	unsigned sz = 0;
+	unsigned boot_from_tf = 0;
 
 	/* Setup page size information for nand/emmc reads */
 	if (target_is_emmc_boot())
@@ -1485,12 +1488,14 @@ void aboot_init(const struct app_descriptor *app)
 	surf_udc_device.serialno = sn_buf;
 
 	/* Check if we should do something other than booting up */
+	if ((keys_get_state(KEY_VOLUMEDOWN) != 0) && (keys_get_state(KEY_VOLUMEUP) != 0))
+		goto fastboot;
 	if (keys_get_state(KEY_VOLUMEDOWN) != 0)
 		boot_into_recovery = 1;
 	if(!boot_into_recovery)
 	{
 		if (keys_get_state(KEY_VOLUMEUP) != 0)
-			goto fastboot;
+			boot_from_tf = 1;
 	}
 
 	#if NO_KEYPAD_DRIVER
@@ -1510,6 +1515,29 @@ void aboot_init(const struct app_descriptor *app)
 
 	if (target_is_emmc_boot())
 	{
+		if(boot_from_tf)
+		{
+			boot_from_tf = 0;
+			if (mmc_boot_main(MMC_SLOT3, MSM_SDC3_BASE)) 
+			{
+				dprintf(CRITICAL, "mmc 3 init failed!");
+//				ASSERT(0);
+				if (mmc_boot_main(MMC_SLOT, MSM_SDC1_BASE)) 
+				{
+					dprintf(CRITICAL, "mmc 1 init failed!");
+					ASSERT(0);
+				}
+			}
+
+		}
+		else
+		{
+			if (mmc_boot_main(MMC_SLOT, MSM_SDC1_BASE)) 
+			{
+				dprintf(CRITICAL, "mmc 1 init failed!");
+				ASSERT(0);
+			}
+		}
 		if(emmc_recovery_init())
 			dprintf(ALWAYS,"error in emmc_recovery_init\n");
 		if(target_use_signed_kernel())

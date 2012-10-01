@@ -149,7 +149,8 @@ DEPS := $(ALLOBJS:%o=%d)
 # default to no ccache
 CCACHE ?= 
 CC := $(CCACHE) $(TOOLCHAIN_PREFIX)gcc
-LD := $(TOOLCHAIN_PREFIX)ld.bfd
+# LD := $(TOOLCHAIN_PREFIX)ld.bfd 
+LD := $(TOOLCHAIN_PREFIX)ld
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
 OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 CPPFILT := $(TOOLCHAIN_PREFIX)c++filt

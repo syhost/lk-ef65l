@@ -32,7 +32,7 @@
 #include "partition_parser.h"
 
 char *ext4_partitions[] = { "system", "userdata", "persist", "cache", "tombstones" };
-char *vfat_partitions[] = { "fotamodem", "mdm", "NONE" };
+char *vfat_partitions[] = { "modem", "mdm", "NONE" };
 
 unsigned int ext4_count = 0;
 unsigned int vfat_count = 0;
