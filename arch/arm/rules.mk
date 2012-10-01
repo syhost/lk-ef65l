@@ -99,7 +99,8 @@ OBJS += \
 	$(LOCAL_DIR)/dcc.o
 
 # set the default toolchain to arm eabi and set a #define
-TOOLCHAIN_PREFIX ?= /usr/local/arm-eabi-4.4.3/bin/arm-eabi-
+# TOOLCHAIN_PREFIX ?= /usr/local/arm-eabi-4.4.3/bin/arm-eabi-
+TOOLCHAIN_PREFIX ?= arm-eabi-
 ifeq ($(TOOLCHAIN_PREFIX),arm-none-linux-gnueabi-)
 # XXX test for EABI better than this
 # eabi compilers dont need this
