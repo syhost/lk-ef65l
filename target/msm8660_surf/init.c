@@ -96,11 +96,11 @@ void target_init(void)
 //	if (mmc_boot_main(MMC_SLOT3, MSM_SDC3_BASE)) 
 //	{
 //		dprintf(CRITICAL, "mmc 3 init failed!");
-//-----		if (mmc_boot_main(MMC_SLOT, MSM_SDC1_BASE)) 
-//-----		{
-//-----			dprintf(CRITICAL, "mmc 1 init failed!");
-//-----			ASSERT(0);
-//-----		}
+		if (mmc_boot_main(MMC_SLOT, MSM_SDC1_BASE)) 
+		{
+			dprintf(CRITICAL, "mmc 1 init failed!");
+			ASSERT(0);
+		}
 //	}
 }
 
