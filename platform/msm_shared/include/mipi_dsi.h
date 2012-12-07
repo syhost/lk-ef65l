@@ -78,6 +78,7 @@
 #define MIPI_DSI_MRPS       0x04	/* Maximum Return Packet Size */
 #define MIPI_DSI_REG_LEN    16	/* 4 x 4 bytes register */
 
+#define DTYPE_DCS_WRITE	0x05	/* short write, 0 parameter */
 #define DTYPE_GEN_WRITE2 0x23	/* 4th Byte is 0x80 */
 #define DTYPE_GEN_LWRITE 0x29	/* 4th Byte is 0xc0 */
 #define DTYPE_DCS_WRITE1 0x15	/* 4th Byte is 0x80 */
@@ -466,6 +467,15 @@ static const unsigned char dsi_display_display_on[4] = {
 #define MIPI_VIDEO_MODE	        1
 #define MIPI_CMD_MODE           2
 
+#ifdef DISPLAY_MIPI_PANEL_SONY
+struct mipi_dsi_phy_ctrl {
+	uint32_t regulator[4];
+	uint32_t timing[12];
+	uint32_t ctrl[4];
+	uint32_t strength[4];
+	uint32_t pll[21];
+};
+#else
 struct mipi_dsi_phy_ctrl {
 	uint32_t regulator[5];
 	uint32_t timing[12];
@@ -473,6 +483,7 @@ struct mipi_dsi_phy_ctrl {
 	uint32_t strength[4];
 	uint32_t pll[21];
 };
+#endif
 
 struct mipi_dsi_cmd {
 	int size;
@@ -660,6 +671,21 @@ static struct mipi_dsi_phy_ctrl mipi_dsi_novatek_panel_phy_ctrl = {
 	 /* 0x30, 0x07, 0x07,  --> One lane configuration */
 	 0x30, 0x07, 0x03,	/*  --> Two lane configuration */
 	 0x05, 0x14, 0x03, 0x0, 0x0, 0x54, 0x06, 0x10, 0x04, 0x0},
+};
+
+static struct mipi_dsi_phy_ctrl mipi_dsi_sony_panel_phy_ctrl = {
+		/* DSI_BIT_CLK at 500Mbps, 4 lane, RGB888 */
+		{0x03, 0x01, 0x01, 0x00},	/* regulator */
+		/* timing   */
+		{0xb9, 0x8e, 0x20, 0x00, 0x24, 0x96, 0x23,
+		0x90, 0x24, 0x03, 0x04},
+		{0x7f, 0x00, 0x00, 0x00},	/* phy ctrl */
+		{0xee, 0x03, 0x86, 0x03},	/* strength */
+		/* pll control */
+		{0x40, 0xF9, 0x30, 0xda, 0x00, 0x50, 0x48, 0x63,
+		0x30, 0x07, 0x01,
+		//0x31, 0x0f, 0x03,
+		0x05, 0x14, 0x03, 0x0, 0x0, 0x54, 0x06, 0x10, 0x04, 0x0},
 };
 
 enum {		/* mipi dsi panel */

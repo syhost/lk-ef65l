@@ -60,8 +60,7 @@ int nt_pll_enable(uint8_t src, uint8_t enable)
 	uint32_t pll_mode;
 
 	pll_mode = secure_readl(pll_reg[src].mode_reg);
-	if (enable) 
-	{
+	if (enable) {
 		/* Disable PLL bypass mode. */
 		pll_mode |= (1 << 1);
 		secure_writel(pll_mode, pll_reg[src].mode_reg);
@@ -80,9 +79,7 @@ int nt_pll_enable(uint8_t src, uint8_t enable)
 
 		/* Wait until PLL is enabled. */
 		while (!secure_readl(pll_reg[src].status_reg)) ;
-	} 
-	else 
-	{
+	} else {
 		/* Disable the PLL output, disable test mode, enable
 		 * the bypass mode, and assert the reset. */
 		pll_mode &= 0xFFFFFFF0;
@@ -312,8 +309,7 @@ void clock_config_i2c(uint8_t id, uint32_t freq)
 	uint32_t ns;
 	uint32_t md;
 
-	switch (freq) 
-	{
+	switch (freq) {
 	case 24000000:
 		ns = I2C_CLK_NS_24MHz;
 		md = I2C_CLK_MD_24MHz;
@@ -339,14 +335,17 @@ void clock_config_mmc(uint32_t interface, uint32_t freq)
 {
 	uint32_t reg = 0;
 
-	switch (freq) 
-	{
+	switch (freq) {
 	case MMC_CLK_400KHZ:
-		clock_config(SDC_CLK_NS_400KHZ, SDC_CLK_MD_400KHZ, SDC_NS(interface), SDC_MD(interface));
+		clock_config(SDC_CLK_NS_400KHZ,
+			     SDC_CLK_MD_400KHZ,
+			     SDC_NS(interface), SDC_MD(interface));
 		break;
 	case MMC_CLK_48MHZ:
 	case MMC_CLK_50MHZ:	/* Max supported is 48MHZ */
-		clock_config(SDC_CLK_NS_48MHZ, SDC_CLK_MD_48MHZ, SDC_NS(interface), SDC_MD(interface));
+		clock_config(SDC_CLK_NS_48MHZ,
+			     SDC_CLK_MD_48MHZ,
+			     SDC_NS(interface), SDC_MD(interface));
 		break;
 	default:
 		ASSERT(0);
@@ -364,18 +363,20 @@ void mdp_clock_init(void)
 	/* Turn on the PLL2, to ramp up the MDP clock to max (200MHz) */
 	nt_pll_enable(PLL_2, 1);
 
-	config_mdp_clk(MDP_NS_VAL, MDP_MD_VAL, MDP_CC_VAL, MDP_NS_REG, MDP_MD_REG, MDP_CC_REG);
+	config_mdp_clk(MDP_NS_VAL, MDP_MD_VAL,
+		       MDP_CC_VAL, MDP_NS_REG, MDP_MD_REG, MDP_CC_REG);
 }
 
 void mmss_pixel_clock_configure(uint32_t pclk_id)
 {
-	if (pclk_id == PIXEL_CLK_INDEX_25M) 
-	{
-		config_pixel_clk(PIXEL_NS_VAL_25M, PIXEL_MD_VAL_25M, PIXEL_CC_VAL_25M, MMSS_PIXEL_NS_REG, MMSS_PIXEL_MD_REG, MMSS_PIXEL_CC_REG);
-	} 
-	else 
-	{
-		config_pixel_clk(PIXEL_NS_VAL, PIXEL_MD_VAL, PIXEL_CC_VAL, MMSS_PIXEL_NS_REG, MMSS_PIXEL_MD_REG, MMSS_PIXEL_CC_REG);
+	if (pclk_id == PIXEL_CLK_INDEX_25M) {
+		config_pixel_clk(PIXEL_NS_VAL_25M, PIXEL_MD_VAL_25M,
+				 PIXEL_CC_VAL_25M, MMSS_PIXEL_NS_REG,
+				 MMSS_PIXEL_MD_REG, MMSS_PIXEL_CC_REG);
+	} else {
+		config_pixel_clk(PIXEL_NS_VAL, PIXEL_MD_VAL,
+				 PIXEL_CC_VAL, MMSS_PIXEL_NS_REG,
+				 MMSS_PIXEL_MD_REG, MMSS_PIXEL_CC_REG);
 	}
 }
 

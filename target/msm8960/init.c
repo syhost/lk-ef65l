@@ -132,10 +132,8 @@ void target_init(void)
 	dprintf(SPEW, "Diplay initialized\n");
 #endif
 
-	if ((platform_id == MSM8960) 
-		|| (platform_id == MSM8660A)
-        || (platform_id == MSM8260A) 
-        || (platform_id == APQ8060A))
+	if ((platform_id == MSM8960) || (platform_id == MSM8660A)
+        || (platform_id == MSM8260A) || (platform_id == APQ8060A))
 		/* Enable Hardware CE */
 		platform_ce_type = CRYPTO_ENGINE_TYPE_HW;
 

@@ -58,6 +58,7 @@ void gpio_keypad_init(struct gpio_keypad_info *kpinfo);
 // GPIO configurations
 
 #define	SSBI_REG_ADDR_GPIO_BASE		0x150
+#define	SSBI_REG_ADDR_GPIO(n)		(SSBI_REG_ADDR_GPIO_BASE + n)
 
 #define QT_PMIC_GPIO_KYPD_SNS           0x008
 #define QT_PMIC_GPIO_KYPD_DRV           0x003
@@ -113,10 +114,16 @@ void gpio_keypad_init(struct gpio_keypad_info *kpinfo);
 /* Bank 3 */
 #define	PM8058_GPIO_OUT_STRENGTH_MASK   0x0C
 #define	PM8058_GPIO_OUT_STRENGTH_SHIFT  2
+#define	PM8058_GPIO_PIN_ENABLE		0x00
+#define	PM8058_GPIO_PIN_DISABLE		0x01
 
 /* Bank 4 */
 #define	PM8058_GPIO_FUNC_MASK		0x0E
 #define	PM8058_GPIO_FUNC_SHIFT		1
+
+/* Bank 5 */
+#define	PM8058_GPIO_NON_INT_POL_INV	0x08
+#define PM8058_GPIO_BANKS		6
 
 struct pm8058_gpio {
 	int		direction;

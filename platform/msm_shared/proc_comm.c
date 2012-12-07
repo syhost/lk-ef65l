@@ -165,13 +165,14 @@ int msm_proc_comm(unsigned cmd, unsigned *data1, unsigned *data2)
 
 //      dprintf(INFO, "proc_comm(%d,%d,%d)\n",
 //              cmd, data1 ? *data1 : 0, data2 ? *data2 : 0);
-	while (readl(MDM_STATUS) != PCOM_READY) 
-	{
+	while (readl(MDM_STATUS) != PCOM_READY) {
 		/* XXX check for A9 reset */
 	}
 
-	if (data1) writel(*data1, APP_DATA1);
-	if (data2) writel(*data2, APP_DATA2);
+	if (data1)
+		writel(*data1, APP_DATA1);
+	if (data2)
+		writel(*data2, APP_DATA2);
 
 	/*
 	 * As per the specs write data, cmd, interrupt for
@@ -180,18 +181,18 @@ int msm_proc_comm(unsigned cmd, unsigned *data1, unsigned *data2)
 	writel(cmd, APP_COMMAND);
 //      dprintf(INFO, "proc_comm tx\n");
 	notify_other_proc_comm();
-	while (readl(APP_COMMAND) != PCOM_CMD_DONE) 
-	{
+	while (readl(APP_COMMAND) != PCOM_CMD_DONE) {
 		/* XXX check for A9 reset */
 	}
 
 	status = readl(APP_STATUS);
 //      dprintf(INFO, "proc_comm status %d\n", status);
 
-	if (status != PCOM_CMD_FAIL) 
-	{
-		if (data1) *data1 = readl(APP_DATA1);
-		if (data2) *data2 = readl(APP_DATA2);
+	if (status != PCOM_CMD_FAIL) {
+		if (data1)
+			*data1 = readl(APP_DATA1);
+		if (data2)
+			*data2 = readl(APP_DATA2);
 		ret = 0;
 		/*
 		 * Write command idle to indicate non HLOS that
@@ -221,12 +222,9 @@ static int clock_set_rate(unsigned id, unsigned rate)
 
 static int clock_get_rate(unsigned id)
 {
-	if (msm_proc_comm(PCOM_CLKCTL_RPC_RATE, &id, 0)) 
-	{
+	if (msm_proc_comm(PCOM_CLKCTL_RPC_RATE, &id, 0)) {
 		return -1;
-	}
-	else 
-	{
+	} else {
 		return (int)id;
 	}
 }
@@ -257,6 +255,12 @@ void mdp_clock_disable(void)
 	if (!target_cont_splash_screen())
 		clock_disable(MDP_CLK);
 	clock_disable(MDP_P_CLK);
+}
+
+void lcdc_clock_disable(void)
+{
+	clock_disable(MDP_LCDC_PAD_PCLK_CLK);
+	clock_disable(MDP_LCDC_PCLK_CLK);
 }
 
 void uart3_clock_init(void)

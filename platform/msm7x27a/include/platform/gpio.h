@@ -1,4 +1,4 @@
-/* Copyright (c) 2011, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -26,8 +26,8 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_MSM8X60_GPIO_H
-#define __PLATFORM_MSM8X60_GPIO_H
+#ifndef __PLATFORM_MSM7X27A_GPIO_H
+#define __PLATFORM_MSM7X27A_GPIO_H
 
 /* GPIO TLMM: Direction */
 #ifndef GPIO_INPUT
@@ -57,18 +57,10 @@
 #define GPIO_ENABLE     0
 #define GPIO_DISABLE    1
 
-#define GPIO_LOW_VALUE 0
-#define GPIO_HIGH_VALUE 1
-
-#define GPIO_CFG(gpio, func, dir, pull, drvstr) \
-				((((gpio) & 0x3FF) << 4)        |	  \
-				((func) & 0xf)                  |	  \
-				(((dir) & 0x1) << 14)           |	  \
-				(((pull) & 0x3) << 15)          |	  \
-				(((drvstr) & 0xF) << 17))
-	 
-
-void gpio_config_i2c(uint8_t gsbi_id);
-void gpio_config_uart_dm(uint8_t id);
-
+#define GPIO_CFG(gpio, func, dir, pull, drvstr)\
+	((((gpio) & 0x3ff) << 4)  | \
+	((func) & 0xf)            | \
+	(((dir) & 0x1) << 14)     | \
+	(((pull) & 0x3) << 15)    | \
+	(((drvstr) & 0xf) << 17))
 #endif

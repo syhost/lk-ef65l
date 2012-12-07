@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009, Google Inc.
  * All rights reserved.
- * Copyright (c) 2009-2012, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2009-2012, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,6 +54,7 @@ unsigned int fota_cookie[1];
 static struct ptable flash_ptable;
 unsigned hw_platform = 0;
 unsigned target_msm_id = 0;
+unsigned msm_version = 0;
 
 /* Setting this variable to different values defines the
  * behavior of CE engine:
@@ -65,6 +66,7 @@ unsigned target_msm_id = 0;
 static crypto_engine_type platform_ce_type = CRYPTO_ENGINE_TYPE_SW;
 
 int machine_is_evb();
+int machine_is_skud();
 
 /* for these partitions, start will be offset by either what we get from
  * smem, or from the above offset if smem is not useful. Also, we should
@@ -203,7 +205,6 @@ void target_init(void)
 	ptable_dump(&flash_ptable);
 	flash_set_ptable(&flash_ptable);
 }
-
 void board_info(void)
 {
 	struct smem_board_info_v4 board_info_v4;
@@ -231,12 +232,20 @@ void board_info(void)
 				id = board_info_v4.board_info_v3.hw_platform;
 				target_msm_id =
 				    board_info_v4.board_info_v3.msm_id;
+				msm_version =
+				    board_info_v4.board_info_v3.msm_version;
 			}
 		}
 
 		/* Detect SURF v/s FFA v/s QRD */
-		if (target_msm_id >= MSM8225 && target_msm_id <= MSM8625
-						|| (target_msm_id == MSM8125A)) {
+		if (target_msm_id == MSM8225 ||
+			target_msm_id == ESM8225  ||
+			target_msm_id == MSM8625  ||
+			target_msm_id == MSM8125A ||
+			target_msm_id == MSM8125  ||
+			target_msm_id == MSM8225Q ||
+			target_msm_id == MSM8625Q ||
+			target_msm_id == MSM8125Q) {
 			switch (id) {
 			case 0x1:
 				hw_platform = MSM8X25_SURF;
@@ -246,6 +255,17 @@ void board_info(void)
 				break;
 			case 0x10:
 				hw_platform = MSM8X25_EVT;
+				break;
+			case 0x11:
+				if ((target_msm_id >= MSM8225Q)
+					&& (target_msm_id <= MSM8125Q))
+					hw_platform = MSM8X25Q_SKUD;
+				else
+					hw_platform = MSM8X25Q_SKUD_PRIME;
+				break;
+			case 0x12:
+			case 0x13:
+				hw_platform = MSM8X25Q_EVBD;
 				break;
 			case 0xC:
 				hw_platform = MSM8X25_EVB;
@@ -307,6 +327,7 @@ void board_info(void)
 		case MSM8225:
 		case MSM8625:
 		case MSM8125A:
+		case MSM8125:
 			target_msm_id = MSM8625;
 			break;
 		default:
@@ -326,6 +347,13 @@ unsigned board_msm_id(void)
 {
 	board_info();
 	return target_msm_id;
+}
+
+unsigned board_msm_version(void)
+{
+	board_info();
+	msm_version = (msm_version & 0xffff0000) >> 16;
+	return msm_version;
 }
 
 crypto_engine_type board_ce_type(void)
@@ -531,6 +559,22 @@ int machine_is_qrd()
 	}
 	return ret;
 }
+int machine_is_skud()
+{
+	int ret = 0;
+	unsigned mach_type = board_machtype();
+
+	switch(mach_type) {
+		case MSM8X25Q_SKUD_PRIME:
+		case MSM8X25Q_SKUD:
+		case MSM8X25Q_EVBD:
+			ret = 1;
+			break;
+		default:
+			ret = 0;
+	}
+	return ret;
+}
 int machine_is_8x25()
 {
 	int ret = 0;
@@ -542,6 +586,9 @@ int machine_is_8x25()
 		case MSM8X25_EVB:
 		case MSM8X25_EVT:
 		case MSM8X25_QRD7:
+		case MSM8X25Q_SKUD_PRIME:
+		case MSM8X25Q_SKUD:
+		case MSM8X25Q_EVBD:
 			ret = 1;
 			break;
 		default:
@@ -615,9 +662,29 @@ int target_cont_splash_screen()
 	switch(mach_type) {
 		case MSM8X25_EVB:
 		case MSM8X25_EVT:
+		case MSM8X25_QRD7:
+		case MSM8X25Q_SKUD_PRIME:
+		case MSM8X25Q_SKUD:
+		case MSM8X25Q_EVBD:
 			ret = 1;
 			break;
 		default:
+			ret = 0;
+	};
+	return ret;
+}
+int target_is_sku3()
+{
+       int ret = 0;
+       unsigned mach_type = 0;
+
+       mach_type = board_machtype();
+
+       switch(mach_type) {
+               case MSM7X27A_QRD3:
+                        ret = 1;
+                        break;
+                default:
 			ret = 0;
 	};
 	return ret;

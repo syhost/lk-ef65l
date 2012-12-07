@@ -93,15 +93,10 @@ void target_init(void)
 	display_image_on_screen();
 #endif
 
-//	if (mmc_boot_main(MMC_SLOT3, MSM_SDC3_BASE)) 
-//	{
-//		dprintf(CRITICAL, "mmc 3 init failed!");
-		if (mmc_boot_main(MMC_SLOT, MSM_SDC1_BASE)) 
-		{
-			dprintf(CRITICAL, "mmc 1 init failed!");
-			ASSERT(0);
-		}
-//	}
+	if (mmc_boot_main(MMC_SLOT, MSM_SDC1_BASE)) {
+		dprintf(CRITICAL, "mmc init failed!");
+		ASSERT(0);
+	}
 }
 
 unsigned board_machtype(void)
@@ -122,37 +117,36 @@ unsigned board_machtype(void)
 	/* Detect external msm if this is a "fusion" */
 	smem_status = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION,
 						   &format, sizeof(format), 0);
-	if (!smem_status) 
-	{
-		if (format == 5) 
-		{
+	if (!smem_status) {
+		if (format == 5) {
 			board_info_len = sizeof(board_info_v5);
 
-			smem_status = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v5, board_info_len);
-			if (!smem_status) 
-			{
+			smem_status =
+			    smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+						  &board_info_v5,
+						  board_info_len);
+			if (!smem_status) {
 				fused_chip = board_info_v5.fused_chip;
 				id = board_info_v5.board_info_v3.hw_platform;
 			}
-		} 
-		else if (format == 6) 
-		{
+		} else if (format == 6) {
 			board_info_len = sizeof(board_info_v6);
 
 			smem_status =
-			    smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v6, board_info_len);
-			if (!smem_status) 
-			{
+			    smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+						  &board_info_v6,
+						  board_info_len);
+			if (!smem_status) {
 				fused_chip = board_info_v6.fused_chip;
 				id = board_info_v6.board_info_v3.hw_platform;
-				platform_subtype = board_info_v6.platform_subtype;
+				platform_subtype =
+				    board_info_v6.platform_subtype;
 			}
 		}
 	}
 
 	/* Detect SURF v/s FFA v/s Fluid */
-	switch (id) 
-	{
+	switch (id) {
 	case 0x1:
 		hw_platform = HW_PLATFORM_SURF;
 		break;
@@ -173,20 +167,16 @@ unsigned board_machtype(void)
 		   SURF and FFA. If we read back, it is SURF */
 		debug_led_write(0xA5);
 
-		if ((debug_led_read() & 0xFF) == 0xA5) 
-		{
+		if ((debug_led_read() & 0xFF) == 0xA5) {
 			debug_led_write(0);
 			hw_platform = HW_PLATFORM_SURF;
-		} 
-		else
+		} else
 			hw_platform = HW_PLATFORM_FFA;
 	};
 
 	/* Use platform_subtype or fused_chip information to determine machine id */
-	if (format >= 6) 
-	{
-		switch (platform_subtype) 
-		{
+	if (format >= 6) {
+		switch (platform_subtype) {
 		case HW_PLATFORM_SUBTYPE_CSFB:
 		case HW_PLATFORM_SUBTYPE_SVLTE2A:
 			if (hw_platform == HW_PLATFORM_SURF)
@@ -206,11 +196,8 @@ unsigned board_machtype(void)
 			else if (hw_platform == HW_PLATFORM_DRAGON)
 				mach_id = LINUX_MACHTYPE_8x60_DRAGON;
 		}
-	} 
-	else if (format == 5) 
-	{
-		switch (fused_chip) 
-		{
+	} else if (format == 5) {
+		switch (fused_chip) {
 		case UNKNOWN:
 			if (hw_platform == HW_PLATFORM_SURF)
 				mach_id = LINUX_MACHTYPE_8660_SURF;
@@ -335,41 +322,45 @@ unsigned target_baseband()
 	unsigned format = 0;
 	unsigned baseband = BASEBAND_MSM;
 
-	smem_status = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION, &format, sizeof(format), 0);
-	if (!smem_status) 
-	{
-		if (format == 5) 
-		{
+	smem_status = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION,
+						   &format, sizeof(format), 0);
+	if (!smem_status) {
+		if (format == 5) {
 			board_info_len = sizeof(board_info_v5);
 
 			smem_status =
-			    smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v5, board_info_len);
-			if (!smem_status) 
-			{
+			    smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+						  &board_info_v5,
+						  board_info_len);
+			if (!smem_status) {
 				/* Check for LTE fused targets or APQ.  Default to MSM */
 				if (board_info_v5.fused_chip == MDM9200)
 					baseband = BASEBAND_CSFB;
 				else if (board_info_v5.fused_chip == MDM9600)
 					baseband = BASEBAND_SVLTE2A;
-				else if (board_info_v5.board_info_v3.msm_id == APQ8060)
+				else if (board_info_v5.board_info_v3.msm_id ==
+					 APQ8060)
 					baseband = BASEBAND_APQ;
 				else
 					baseband = BASEBAND_MSM;
 			}
-		} 
-		else if (format >= 6) 
-		{
+		} else if (format >= 6) {
 			board_info_len = sizeof(board_info_v6);
 
-			smem_status = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v6, board_info_len);
-			if (!smem_status) 
-			{
+			smem_status =
+			    smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+						  &board_info_v6,
+						  board_info_len);
+			if (!smem_status) {
 				/* Check for LTE fused targets or APQ.  Default to MSM */
-				if (board_info_v6.platform_subtype == HW_PLATFORM_SUBTYPE_CSFB)
+				if (board_info_v6.platform_subtype ==
+				    HW_PLATFORM_SUBTYPE_CSFB)
 					baseband = BASEBAND_CSFB;
-				else if (board_info_v6.platform_subtype == HW_PLATFORM_SUBTYPE_SVLTE2A)
+				else if (board_info_v6.platform_subtype ==
+					 HW_PLATFORM_SUBTYPE_SVLTE2A)
 					baseband = BASEBAND_SVLTE2A;
-				else if (board_info_v6.board_info_v3.msm_id == APQ8060)
+				else if (board_info_v6.board_info_v3.msm_id ==
+					 APQ8060)
 					baseband = BASEBAND_APQ;
 				else
 					baseband = BASEBAND_MSM;
@@ -388,34 +379,31 @@ crypto_engine_type board_ce_type(void)
 	unsigned smem_status = 0;
 	unsigned format = 0;
 
-	smem_status = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION, &format, sizeof(format), 0);
-	if (!smem_status) 
-	{
-		if (format == 5) 
-		{
+	smem_status = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION,
+							&format, sizeof(format), 0);
+	if (!smem_status) {
+		if (format == 5) {
 			board_info_len = sizeof(board_info_v5);
 
-			smem_status = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v5, board_info_len);
-			if (!smem_status) 
-			{
-				if ((board_info_v5.board_info_v3.msm_id == APQ8060) ||
-					(board_info_v5.board_info_v3.msm_id == MSM8660) ||
-					(board_info_v5.board_info_v3.msm_id == MSM8260))
-					
-					platform_ce_type = CRYPTO_ENGINE_TYPE_HW;
+			smem_status = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+							&board_info_v5,
+							board_info_len);
+		if (!smem_status) {
+			if ((board_info_v5.board_info_v3.msm_id == APQ8060) ||
+				(board_info_v5.board_info_v3.msm_id == MSM8660) ||
+				(board_info_v5.board_info_v3.msm_id == MSM8260))
+				platform_ce_type = CRYPTO_ENGINE_TYPE_HW;
             }
-		} 
-		else if (format >= 6) 
-		{
+		} else if (format >= 6) {
 			board_info_len = sizeof(board_info_v6);
 
-			smem_status = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v6, board_info_len);
-			if(!smem_status) 
-			{
+			smem_status = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+							&board_info_v6,
+							board_info_len);
+			if(!smem_status) {
 				if ((board_info_v6.board_info_v3.msm_id == APQ8060) ||
 					(board_info_v6.board_info_v3.msm_id == MSM8660) ||
 					(board_info_v6.board_info_v3.msm_id == MSM8260))
-					
                     platform_ce_type = CRYPTO_ENGINE_TYPE_HW;
 			}
 		}
@@ -430,11 +418,12 @@ static unsigned target_check_power_on_reason(void)
 	unsigned int status_len = sizeof(power_on_status);
 	unsigned smem_status;
 
-	smem_status = smem_read_alloc_entry(SMEM_POWER_ON_STATUS_INFO, &power_on_status, status_len);
+	smem_status = smem_read_alloc_entry(SMEM_POWER_ON_STATUS_INFO,
+					    &power_on_status, status_len);
 
-	if (smem_status) 
-	{
-		dprintf(CRITICAL, "ERROR: unable to read shared memory for power on reason\n");
+	if (smem_status) {
+		dprintf(CRITICAL,
+			"ERROR: unable to read shared memory for power on reason\n");
 	}
 	dprintf(INFO, "Power on reason %u\n", power_on_status);
 	return power_on_status;
@@ -442,9 +431,9 @@ static unsigned target_check_power_on_reason(void)
 
 static void target_shutdown_for_rtc_alarm(void)
 {
-	if (target_check_power_on_reason() == PWR_ON_EVENT_RTC_ALARM) 
-	{
-		dprintf(CRITICAL, "Power on due to RTC alarm. Going to shutdown!!\n");
+	if (target_check_power_on_reason() == PWR_ON_EVENT_RTC_ALARM) {
+		dprintf(CRITICAL,
+			"Power on due to RTC alarm. Going to shutdown!!\n");
 		pm8058_rtc0_alarm_irq_disable();
 		shutdown_device();
 	}
@@ -461,8 +450,7 @@ unsigned target_pause_for_battery_charge(void)
 void target_serialno(unsigned char *buf)
 {
 	unsigned int serialno;
-	if (target_is_emmc_boot()) 
-	{
+	if (target_is_emmc_boot()) {
 		serialno = mmc_get_psn();
 		snprintf((char *)buf, 13, "%x", serialno);
 	}

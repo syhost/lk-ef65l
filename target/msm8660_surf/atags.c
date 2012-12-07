@@ -62,24 +62,19 @@ unsigned *target_atag_mem(unsigned *ptr)
 	value = readl(EBI1_CS1_ADDR_BASE);
 	value = (value >> 8) & 0xFF;
 
-	if (value == 0x50) 
-	{
+	if (value == 0x50) {
 		/* For 512MB RAM */
 		*ptr++ = 4;
 		*ptr++ = 0x54410002;
 		*ptr++ = SIZE_256M;
 		*ptr++ = EBI1_ADDR_1280M;
-	} 
-	else if (value == 0x60) 
-	{
+	} else if (value == 0x60) {
 		/* For 1GB RAM */
 		*ptr++ = 4;
 		*ptr++ = 0x54410002;
 		*ptr++ = SIZE_768M;
 		*ptr++ = EBI1_ADDR_1280M;
-	} 
-	else if (value == 0x80) 
-	{
+	} else if (value == 0x80) {
 		/* For 2GB RAM */
 		*ptr++ = 4;
 		*ptr++ = 0x54410002;
@@ -98,5 +93,5 @@ void *target_get_scratch_address(void)
 
 unsigned target_get_max_flash_size(void)
 {
-	return (1024 * 1024 * 1024);
+	return (384 * 1024 * 1024);
 }

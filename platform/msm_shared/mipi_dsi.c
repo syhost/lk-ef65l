@@ -84,6 +84,24 @@ struct mipi_dsi_panel_config novatek_panel_info = {
 	.panel_cmds = novatek_panel_cmd_mode_cmds,
 	.num_of_panel_cmds = ARRAY_SIZE(novatek_panel_cmd_mode_cmds),
 };
+#elif DISPLAY_MIPI_PANEL_SONY
+static struct fbcon_config mipi_fb_cfg = {
+	.height = SONY_MIPI_FB_HEIGHT,
+	.width = SONY_MIPI_FB_WIDTH,
+	.stride = SONY_MIPI_FB_WIDTH,
+	.format = FB_FORMAT_RGB888,
+	.bpp = 24,
+	.update_start = NULL,
+	.update_done = NULL,
+};
+
+struct mipi_dsi_panel_config sony_panel_info = {
+	.mode = MIPI_VIDEO_MODE,
+	.num_of_lanes = 4,
+	.dsi_phy_config = &mipi_dsi_sony_panel_phy_ctrl,
+	.panel_cmds = sony_panel_video_mode_cmds,
+	.num_of_panel_cmds = ARRAY_SIZE(sony_panel_video_mode_cmds),
+};
 #else
 static struct fbcon_config mipi_fb_cfg = {
 	.height = 0,
@@ -106,6 +124,8 @@ struct mipi_dsi_panel_config *get_panel_info(void)
 	return &toshiba_panel_info;
 #elif DISPLAY_MIPI_PANEL_NOVATEK_BLUE
 	return &novatek_panel_info;
+#elif DISPLAY_MIPI_PANEL_SONY
+	return &sony_panel_info;
 #endif
 	return NULL;
 }
@@ -592,7 +612,7 @@ struct fbcon_config *mipi_init(void)
 	writel(0x00001800, MMSS_SFPB_GPREG);
 #endif
 
-#if DISPLAY_MIPI_PANEL_TOSHIBA_MDT61
+#if DISPLAY_MIPI_PANEL_SONY
 	mipi_dsi_phy_init(panel_info);
 #else
 	mipi_dsi_phy_ctrl_config(panel_info);

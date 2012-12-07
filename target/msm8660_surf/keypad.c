@@ -44,8 +44,7 @@ static unsigned int qt_keymap[] = {
 	[KEYMAP_INDEX(0, 0)] = KEY_VOLUMEUP,	/* Volume up key */
 };
 
-static struct qwerty_keypad_info qt_keypad = 
-{
+static struct qwerty_keypad_info qt_keypad = {
 	.keymap = qt_keymap,
 	.old_keys = qwerty_keys_old,
 	.rec_keys = qwerty_keys_new,
@@ -67,8 +66,7 @@ static unsigned int qwerty_keymap[] =
 //	[KEYMAP_INDEX(1, 3)] = KEY_MENU,		/* menu up key */
 };
 
-static struct qwerty_keypad_info qwerty_keypad = 
-{
+static struct qwerty_keypad_info qwerty_keypad = {
 	.keymap = qwerty_keymap,
 	.old_keys = qwerty_keys_old,
 	.rec_keys = qwerty_keys_new,

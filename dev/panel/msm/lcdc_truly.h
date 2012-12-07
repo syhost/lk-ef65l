@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2008, Google Inc.
- * All rights reserved.
+ * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,9 +10,10 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- *  * Neither the name of Google, Inc. nor the names of its contributors
- *    may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *  * Neither the name of Code Aurora nor
+ *    the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written
+ *    permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -28,40 +28,15 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#ifndef _LCDC_TRULY_H_
+#define _LCDC_TRULY_H_
 
-#include <bits.h>
-#include <debug.h>
-#include <string.h>
-#include <dev/keys.h>
+#define DISPLAY_RESET    90
+#define BACKLIGHT_EN     89
+#define SPI_MOSI         19
+#define SPI_SCLK         20
+#define SPI_CS           21
+#define LCD_LDO_2V8      35
+#define LCD_LDO_1V8      58
 
-static unsigned long key_bitmap[BITMAP_NUM_WORDS(MAX_KEYS)];
-
-void keys_init(void)
-{
-	memset(key_bitmap, 0, sizeof(key_bitmap));
-}
-
-void keys_post_event(uint16_t code, int16_t value)
-{
-	if (code >= MAX_KEYS) {
-		dprintf(INFO, "Invalid keycode posted: %d\n", code);
-		return;
-	}
-
-	/* TODO: Implement an actual event queue if it becomes necessary */
-	if (value)
-		bitmap_set(key_bitmap, code);
-	else
-		bitmap_clear(key_bitmap, code);
-
-//	dprintf(INFO, "key state change: %d %d\n", code, value);
-}
-
-int keys_get_state(uint16_t code)
-{
-	if (code >= MAX_KEYS) {
-		dprintf(INFO, "Invalid keycode requested: %d\n", code);
-		return -1;
-	}
-	return bitmap_test(key_bitmap, code);
-}
+#endif

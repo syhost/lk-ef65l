@@ -1,4 +1,5 @@
-/* Copyright (c) 2011, Code Aurora Forum. All rights reserved.
+/*
+ * * Copyright (c) 2011, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -26,49 +27,41 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PLATFORM_MSM8X60_GPIO_H
-#define __PLATFORM_MSM8X60_GPIO_H
+#include <debug.h>
+#include <platform/pmic.h>
+#include <platform/pmic_vibrator.h>
 
-/* GPIO TLMM: Direction */
-#ifndef GPIO_INPUT
-#define GPIO_INPUT      0
-#endif
-#ifndef GPIO_OUTPUT
-#define GPIO_OUTPUT     1
-#endif
+#define FEATURE_LEVEL_CONTROL
 
-/* GPIO TLMM: Pullup/Pulldown */
-#define GPIO_NO_PULL    0
-#define GPIO_PULL_DOWN  1
-#define GPIO_KEEPER     2
-#define GPIO_PULL_UP    3
+#define VIB_DRV			0x4A
 
-/* GPIO TLMM: Drive Strength */
-#define GPIO_2MA        0
-#define GPIO_4MA        1
-#define GPIO_6MA        2
-#define GPIO_8MA        3
-#define GPIO_10MA       4
-#define GPIO_12MA       5
-#define GPIO_14MA       6
-#define GPIO_16MA       7
+#define VIB_DRV_SEL_MASK	0xf8
+#define VIB_DRV_SEL_SHIFT	0x03
+#define VIB_DRV_EN_MANUAL_MASK	0xfc
 
-/* GPIO TLMM: Status */
-#define GPIO_ENABLE     0
-#define GPIO_DISABLE    1
+#define VIB_MAX_LEVEL_mV	3500
+#define VIB_MIN_LEVEL_mV	1200
 
-#define GPIO_LOW_VALUE 0
-#define GPIO_HIGH_VALUE 1
+static int reg_vib_drv = 0;
 
-#define GPIO_CFG(gpio, func, dir, pull, drvstr) \
-				((((gpio) & 0x3FF) << 4)        |	  \
-				((func) & 0xf)                  |	  \
-				(((dir) & 0x1) << 14)           |	  \
-				(((pull) & 0x3) << 15)          |	  \
-				(((drvstr) & 0xF) << 17))
-	 
+void pmic8058_vib_set(int level, int on)
+{
+	uint8_t val;
+	
+	if((level < VIB_MIN_LEVEL_mV/100) || (level > VIB_MAX_LEVEL_mV/100))
+		return;
 
-void gpio_config_i2c(uint8_t gsbi_id);
-void gpio_config_uart_dm(uint8_t id);
-
-#endif
+	if (on) 
+	{
+		val = 0;
+		val |= ((level << VIB_DRV_SEL_SHIFT) & VIB_DRV_SEL_MASK);
+		pm8058_write_one(val, VIB_DRV);
+		reg_vib_drv = val;
+	} 
+	else 
+	{
+		val = reg_vib_drv;
+		val &= ~VIB_DRV_SEL_MASK;
+		pm8058_write_one(val, VIB_DRV);
+	}
+}

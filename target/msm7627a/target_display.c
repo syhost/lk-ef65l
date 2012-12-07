@@ -30,6 +30,7 @@
 #include <msm_panel.h>
 #include <target/display.h>
 #include <target/board.h>
+#include <dev/lcdc.h>
 
 static struct msm_fb_panel_data panel;
 static uint8_t display_enabled;
@@ -38,6 +39,8 @@ extern int msm_display_init(struct msm_fb_panel_data *pdata);
 extern int msm_display_off();
 extern int mipi_renesas_panel_dsi_config(int);
 extern int mipi_nt35510_panel_dsi_config(int);
+extern int lcdc_truly_panel_on(int);
+extern int mipi_hx8389b_panel_dsi_config(int);
 
 static int msm7627a_mdp_clock_init(int enable)
 {
@@ -53,6 +56,20 @@ static int msm7627a_mdp_clock_init(int enable)
 	return ret;
 }
 
+static int msm7627a_lcdc_clock_init(int enable)
+{
+	int ret = 0;
+	unsigned rate = panel.panel_info.clk_rate;
+
+	if (enable) {
+		mdp_clock_init(rate);
+		lcdc_clock_init(rate);
+	} else {
+		mdp_clock_disable();
+		lcdc_clock_disable();
+	}
+	return ret;
+}
 void display_init(void)
 {
 	unsigned mach_type;
@@ -116,6 +133,33 @@ void display_init(void)
 		if (mach_type == MSM8X25_EVT)
 			panel.rotate = 1;
 		break;
+	case MSM8X25_QRD7:
+		lcdc_truly_hvga_init(&(panel.panel_info));
+		panel.clk_func = msm7627a_lcdc_clock_init;
+		panel.power_func = lcdc_truly_panel_on;
+		panel.fb.base = LCDC_FB_ADDR;
+		panel.fb.width =  panel.panel_info.xres;
+		panel.fb.height =  panel.panel_info.yres;
+		panel.fb.stride =  panel.panel_info.xres;
+		panel.fb.bpp =  panel.panel_info.bpp;
+		panel.fb.format = FB_FORMAT_RGB565;
+		panel.mdp_rev = MDP_REV_303;
+		break;
+	case MSM8X25Q_SKUD_PRIME:
+	case MSM8X25Q_SKUD:
+	case MSM8X25Q_EVBD:
+               mipi_hx8389b_video_qhd_init(&(panel.panel_info));
+               panel.clk_func = msm7627a_mdp_clock_init;
+               panel.power_func = mipi_hx8389b_panel_dsi_config;
+               panel.fb.base = MIPI_FB_ADDR;
+               panel.fb.width =  panel.panel_info.xres;
+               panel.fb.height =  panel.panel_info.yres;
+               panel.fb.stride =  panel.panel_info.xres;
+               panel.fb.bpp =  panel.panel_info.bpp;
+               panel.fb.format = FB_FORMAT_RGB888;
+               panel.mdp_rev = MDP_REV_303;
+               break;
+
 	default:
 		return;
 	};

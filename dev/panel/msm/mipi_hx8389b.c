@@ -1,4 +1,4 @@
-/* Copyright (c) 2010, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -9,7 +9,7 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
+ *     * Neither the name of The Linux Foundation, Inc. nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
@@ -26,50 +26,33 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef _TARGET_QSD8660_SURF_DISPLAY_H
-#define _TARGET_QSD8660_SURF_DISPLAY_H
 
-#define MIPI_FB_ADDR  0x43E00000
+#include <stdint.h>
+#include <msm_panel.h>
+#include <mipi_dsi.h>
+#include <sys/types.h>
+#include <platform/gpio.h>
+#include <err.h>
+#include <reg.h>
+#include <debug.h>
+#include <target/display.h>
+#include <dev/gpio.h>
 
-#define TARGET_XRES 800
-#define TARGET_YRES 1280
+int mipi_hx8389b_panel_dsi_config(int on)
+{
+	if (on) {
+		gpio_tlmm_config(GPIO_CFG(78, 0, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_2MA), 0);
+		gpio_config(78, GPIO_OUTPUT);
+		gpio_set(78, 0x1);
+		mdelay(20);
+		gpio_set(78, 0x0);
+		mdelay(20);
+		gpio_set(78, 0x1);
+		mdelay(20);
+	} else {
+		if (!target_cont_splash_screen())
+			gpio_set(78, 0x0);
+	}
+	return 0;
+}
 
-#define LCDC_FB_WIDTH     800
-#define LCDC_FB_HEIGHT    1280
-
-#define LCDC_HSYNC_PULSE_WIDTH_DCLK 32
-#define LCDC_HSYNC_BACK_PORCH_DCLK  80
-#define LCDC_HSYNC_FRONT_PORCH_DCLK 48
-#define LCDC_HSYNC_SKEW_DCLK        0
-
-#define LCDC_VSYNC_PULSE_WIDTH_LINES 1
-#define LCDC_VSYNC_BACK_PORCH_LINES  4
-#define LCDC_VSYNC_FRONT_PORCH_LINES 3
-
-/* Toshiba MIPI panel */
-#define TSH_MIPI_FB_WIDTH            480
-#define TSH_MIPI_FB_HEIGHT           854
-
-/* NOVATEK MIPI panel */
-#define NOV_MIPI_FB_WIDTH            540
-#define NOV_MIPI_FB_HEIGHT           960
-
-/* Sony MIPI panel */
-#define SONY_MIPI_FB_WIDTH            800
-#define SONY_MIPI_FB_HEIGHT           1280
-
-#define MIPI_HSYNC_PULSE_WIDTH       50
-#define MIPI_HSYNC_BACK_PORCH_DCLK   500
-#define MIPI_HSYNC_FRONT_PORCH_DCLK  500
-
-#define MIPI_VSYNC_PULSE_WIDTH       5
-#define MIPI_VSYNC_BACK_PORCH_LINES  20
-#define MIPI_VSYNC_FRONT_PORCH_LINES 20
-
-/* HDMI Panel Macros for 1080p */
-#define DTV_FB_HEIGHT     1080
-#define DTV_FB_WIDTH      1920
-#define DTV_FORMAT_RGB565 0
-#define DTV_BPP           16
-
-#endif

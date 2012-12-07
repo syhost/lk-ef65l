@@ -10,6 +10,11 @@ OBJS += \
 	$(LOCAL_DIR)/mipi_toshiba_video_wsvga.o
 endif
 
+ifeq ($(PLATFORM),msm8x60)
+OBJS += \
+	$(LOCAL_DIR)/mipi_sony_video_wxga.o
+endif
+
 ifeq ($(PLATFORM),msm7x27a)
 OBJS += \
 	$(LOCAL_DIR)/mipi_renesas.o \
@@ -17,5 +22,8 @@ OBJS += \
 	$(LOCAL_DIR)/mipi_renesas_cmd_fwvga.o \
 	$(LOCAL_DIR)/mipi_nt35510.o \
 	$(LOCAL_DIR)/mipi_nt35510_video_wvga.o \
-	$(LOCAL_DIR)/mipi_nt35510_cmd_wvga.o
+	$(LOCAL_DIR)/mipi_nt35510_cmd_wvga.o \
+	$(LOCAL_DIR)/lcdc_truly_hvga.o \
+        $(LOCAL_DIR)/mipi_hx8389b.o \
+        $(LOCAL_DIR)/mipi_hx8389b_video_qhd.o
 endif

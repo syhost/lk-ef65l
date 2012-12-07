@@ -52,23 +52,27 @@ static uint32_t ticks_per_sec = 0;
 #define MB (1024*1024)
 
 /* LK memory - cacheable, write through */
-#define LK_MEMORY         (MMU_MEMORY_TYPE_STRONGLY_ORDERED | MMU_MEMORY_AP_READ_WRITE)
+#define LK_MEMORY         (MMU_MEMORY_TYPE_STRONGLY_ORDERED | \
+                           MMU_MEMORY_AP_READ_WRITE)
 
 /* Kernel region - cacheable, write through */
-#define KERNEL_MEMORY     (MMU_MEMORY_TYPE_NORMAL_WRITE_THROUGH | MMU_MEMORY_AP_READ_WRITE)
+#define KERNEL_MEMORY     (MMU_MEMORY_TYPE_NORMAL_WRITE_THROUGH  | \
+                           MMU_MEMORY_AP_READ_WRITE)
 
 /* Scratch region - cacheable, write through */
-#define SCRATCH_MEMORY    (MMU_MEMORY_TYPE_NORMAL_WRITE_THROUGH  | MMU_MEMORY_AP_READ_WRITE)
+#define SCRATCH_MEMORY    (MMU_MEMORY_TYPE_NORMAL_WRITE_THROUGH  | \
+                           MMU_MEMORY_AP_READ_WRITE)
 
 /* Peripherals - non-shared device */
-#define IOMAP_MEMORY      (MMU_MEMORY_TYPE_DEVICE_NON_SHARED | MMU_MEMORY_AP_READ_WRITE)
+#define IOMAP_MEMORY      (MMU_MEMORY_TYPE_DEVICE_NON_SHARED | \
+                           MMU_MEMORY_AP_READ_WRITE)
 
 #define MSM_IOMAP_SIZE ((MSM_IOMAP_END - MSM_IOMAP_BASE)/MB)
 
 mmu_section_t mmu_section_table[] = {
 /*  Physical addr,    Virtual addr,    Size (in MB),   Flags */
 	{MEMBASE, MEMBASE, (MEMSIZE / MB), LK_MEMORY},
-	{BASE_ADDR, BASE_ADDR, 44, KERNEL_MEMORY},
+	{BASE_ADDR, BASE_ADDR, 43, KERNEL_MEMORY},
 	{SCRATCH_ADDR, SCRATCH_ADDR, 128, SCRATCH_MEMORY},
 	{MSM_IOMAP_BASE, MSM_IOMAP_BASE, MSM_IOMAP_SIZE, IOMAP_MEMORY},
 };
@@ -121,12 +125,9 @@ void display_init(void)
 #if DISPLAY_TYPE_LCDC
 	struct lcdc_timing_parameters *lcd_timing;
 	mdp_clock_init();
-	if (board_machtype() == LINUX_MACHTYPE_8660_FLUID) 
-	{
+	if (board_machtype() == LINUX_MACHTYPE_8660_FLUID) {
 		mmss_pixel_clock_configure(PIXEL_CLK_INDEX_25M);
-	} 
-	else 
-	{
+	} else {
 		mmss_pixel_clock_configure(PIXEL_CLK_INDEX_54M);
 	}
 	lcd_timing = get_lcd_timing();
@@ -173,15 +174,13 @@ static struct qup_i2c_dev *dev = NULL;
 uint32_t eprom_read(uint16_t addr, uint8_t count)
 {
 	uint32_t ret = 0;
-	if (!dev) 
-	{
+	if (!dev) {
 		return ret;
 	}
 	/* Create a i2c_msg buffer, that is used to put the controller into
 	 * read mode and then to read some data.
 	 */
-	struct i2c_msg msg_buf[] = 
-	{
+	struct i2c_msg msg_buf[] = {
 		{EEPROM_I2C_ADDRESS, I2C_M_WR, 2, &addr},
 		{EEPROM_I2C_ADDRESS, I2C_M_RD, count, &ret}
 	};
@@ -196,15 +195,15 @@ uint32_t platform_id_read(void)
 	uint32_t id = 0;
 	uint16_t offset = 0;
 	dev = qup_i2c_init(GSBI_ID_8, 100000, 24000000);
-	if (!dev) 
-	{
+	if (!dev) {
 		return id;
 	}
 	/* Check if EPROM is valid */
-	if (CONVERT_ENDIAN_U32(eprom_read(0, 4)) == CDT_MAGIC_NUMBER) 
-	{
+	if (CONVERT_ENDIAN_U32(eprom_read(0, 4)) == CDT_MAGIC_NUMBER) {
 		/* Get offset for platform ID info from Meta Data block 0 */
-		offset = eprom_read(CONVERT_ENDIAN_U16(0 + sizeof(struct cdt_header)), 2);
+		offset = eprom_read(CONVERT_ENDIAN_U16(0 +
+						       sizeof(struct
+							      cdt_header)), 2);
 		/* Read platform ID */
 		id = eprom_read(CONVERT_ENDIAN_U16(offset), 4);
 		id = CONVERT_ENDIAN_U32(id);
@@ -220,15 +219,15 @@ void platform_init_mmu_mappings(void)
 	uint32_t sections;
 	uint32_t table_size = ARRAY_SIZE(mmu_section_table);
 
-	for (i = 0; i < table_size; i++) 
-	{
+	for (i = 0; i < table_size; i++) {
 		sections = mmu_section_table[i].num_of_sections;
 
-		while (sections--) 
-		{
-			arm_mmu_map_section(	mmu_section_table[i].paddress + sections * MB,
-									mmu_section_table[i].vaddress + sections * MB,
-									mmu_section_table[i].flags);
+		while (sections--) {
+			arm_mmu_map_section(mmu_section_table[i].paddress +
+					    sections * MB,
+					    mmu_section_table[i].vaddress +
+					    sections * MB,
+					    mmu_section_table[i].flags);
 		}
 	}
 }

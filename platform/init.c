@@ -66,7 +66,7 @@ __WEAK int image_verify(unsigned char * image_ptr,
 			unsigned int image_size,
 			unsigned hash_type)
 {
-	return 1;
+	return 0;
 }
 
 __WEAK ce_clock_init(void)

@@ -104,17 +104,17 @@ struct dt_entry * get_device_tree_ptr(struct dt_table *);
 int update_device_tree(const void *, char *, void *, unsigned);
 #endif
 
-static const char *emmc_cmdline 	= " androidboot.emmc=true";
+static const char *emmc_cmdline = " androidboot.emmc=true";
 static const char *usb_sn_cmdline = " androidboot.serialno=";
-static const char *battchg_pause 	= " androidboot.mode=charger";
-static const char *auth_kernel 	= " androidboot.authorized_kernel=true";
+static const char *battchg_pause = " androidboot.mode=charger";
+static const char *auth_kernel = " androidboot.authorized_kernel=true";
 
-static const char *baseband_apq     	= " androidboot.baseband=apq";
-static const char *baseband_msm    	= " androidboot.baseband=msm";
-static const char *baseband_csfb    	= " androidboot.baseband=csfb";
-static const char *baseband_svlte2a 	= " androidboot.baseband=svlte2a";
+static const char *baseband_apq     = " androidboot.baseband=apq";
+static const char *baseband_msm     = " androidboot.baseband=msm";
+static const char *baseband_csfb    = " androidboot.baseband=csfb";
+static const char *baseband_svlte2a = " androidboot.baseband=svlte2a";
 static const char *baseband_mdm     = " androidboot.baseband=mdm";
-static const char *baseband_sglte   	= " androidboot.baseband=sglte";
+static const char *baseband_sglte   = " androidboot.baseband=sglte";
 
 /* Assuming unauthorized kernel image by default */
 static int auth_kernel_img = 0;
@@ -145,8 +145,6 @@ extern int emmc_recovery_init(void);
 extern int fastboot_trigger(void);
 #endif
 
-extern void set_tamper_flag(int tamper);
-
 static void ptentry_to_tag(unsigned **ptr, struct ptentry *ptn)
 {
 	struct atag_ptbl_entry atag_ptn;
@@ -167,27 +165,23 @@ unsigned char *update_cmdline(const char * cmdline)
 	unsigned char *cmdline_final = NULL;
 	int pause_at_bootup = 0;
 
-	if (cmdline && cmdline[0]) 
-	{
+	if (cmdline && cmdline[0]) {
 		cmdline_len = strlen(cmdline);
 		have_cmdline = 1;
 	}
-	if (target_is_emmc_boot()) 
-	{
+	if (target_is_emmc_boot()) {
 		cmdline_len += strlen(emmc_cmdline);
 	}
 
 	cmdline_len += strlen(usb_sn_cmdline);
 	cmdline_len += strlen(sn_buf);
 
-	if (target_pause_for_battery_charge()) 
-	{
+	if (target_pause_for_battery_charge()) {
 		pause_at_bootup = 1;
 		cmdline_len += strlen(battchg_pause);
 	}
 
-	if(target_use_signed_kernel() && auth_kernel_img) 
-	{
+	if(target_use_signed_kernel() && auth_kernel_img) {
 		cmdline_len += strlen(auth_kernel);
 	}
 
@@ -219,21 +213,18 @@ unsigned char *update_cmdline(const char * cmdline)
 			break;
 	}
 
-	if (cmdline_len > 0) 
-	{
+	if (cmdline_len > 0) {
 		const char *src;
 		char *dst = malloc((cmdline_len + 4) & (~3));
 		assert(dst != NULL);
 
 		/* Save start ptr for debug print */
 		cmdline_final = dst;
-		if (have_cmdline) 
-		{
+		if (have_cmdline) {
 			src = cmdline;
 			while ((*dst++ = *src++));
 		}
-		if (target_is_emmc_boot()) 
-		{
+		if (target_is_emmc_boot()) {
 			src = emmc_cmdline;
 			if (have_cmdline) --dst;
 			have_cmdline = 1;
@@ -249,15 +240,13 @@ unsigned char *update_cmdline(const char * cmdline)
 		have_cmdline = 1;
 		while ((*dst++ = *src++));
 
-		if (pause_at_bootup) 
-		{
+		if (pause_at_bootup) {
 			src = battchg_pause;
 			if (have_cmdline) --dst;
 			while ((*dst++ = *src++));
 		}
 
-		if(target_use_signed_kernel() && auth_kernel_img) 
-		{
+		if(target_use_signed_kernel() && auth_kernel_img) {
 			src = auth_kernel;
 			if (have_cmdline) --dst;
 			while ((*dst++ = *src++));
@@ -315,10 +304,10 @@ unsigned *atag_core(unsigned *ptr)
 
 }
 
-unsigned *atag_ramdisk(unsigned *ptr, void *ramdisk, unsigned ramdisk_size)
+unsigned *atag_ramdisk(unsigned *ptr, void *ramdisk,
+							   unsigned ramdisk_size)
 {
-	if (ramdisk_size) 
-	{
+	if (ramdisk_size) {
 		*ptr++ = 4;
 		*ptr++ = 0x54420005;
 		*ptr++ = (unsigned)ramdisk;
@@ -394,7 +383,9 @@ void generate_atags(unsigned *ptr, const char *cmdline,
 	ptr = atag_end(ptr);
 }
 
-void boot_linux(void *kernel, unsigned *tags, const char *cmdline, unsigned machtype, void *ramdisk, unsigned ramdisk_size)
+void boot_linux(void *kernel, unsigned *tags,
+		const char *cmdline, unsigned machtype,
+		void *ramdisk, unsigned ramdisk_size)
 {
 	int ret = 0;
 	void (*entry)(unsigned, unsigned, unsigned*) = kernel;
@@ -412,7 +403,8 @@ void boot_linux(void *kernel, unsigned *tags, const char *cmdline, unsigned mach
 	generate_atags(tags, cmdline, ramdisk, ramdisk_size);
 #endif
 
-	dprintf(INFO, "booting linux @ %p, ramdisk @ %p (%d)\n", kernel, ramdisk, ramdisk_size);
+	dprintf(INFO, "booting linux @ %p, ramdisk @ %p (%d)\n",
+		kernel, ramdisk, ramdisk_size);
 
 	enter_critical_section();
 	/* do any platform specific cleanup before kernel entry */
@@ -464,47 +456,39 @@ int boot_linux_from_mmc(void)
 #endif
 
 	uhdr = (struct boot_img_hdr *)EMMC_BOOT_IMG_HEADER_ADDR;
-	if (!memcmp(uhdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) 
-	{
+	if (!memcmp(uhdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 		dprintf(INFO, "Unified boot method!\n");
 		hdr = uhdr;
 		goto unified_boot;
 	}
-	if (!boot_into_recovery) 
-	{
+	if (!boot_into_recovery) {
 		index = partition_get_index("boot");
 		ptn = partition_get_offset(index);
-		if(ptn == 0) 
-		{
+		if(ptn == 0) {
 			dprintf(CRITICAL, "ERROR: No boot partition found\n");
                     return -1;
 		}
 	}
-	else 
-	{
+	else {
 		index = partition_get_index("recovery");
 		ptn = partition_get_offset(index);
-		if(ptn == 0) 
-		{
+		if(ptn == 0) {
 			dprintf(CRITICAL, "ERROR: No recovery partition found\n");
                     return -1;
 		}
 	}
 
-	if (mmc_read(ptn + offset, (unsigned int *) buf, page_size)) 
-	{
+	if (mmc_read(ptn + offset, (unsigned int *) buf, page_size)) {
 		dprintf(CRITICAL, "ERROR: Cannot read boot image header\n");
                 return -1;
 	}
 
-	if (memcmp(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) 
-	{
+	if (memcmp(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 		dprintf(CRITICAL, "ERROR: Invalid boot image header\n");
                 return -1;
 	}
 
-	if (hdr->page_size && (hdr->page_size != page_size)) 
-	{
+	if (hdr->page_size && (hdr->page_size != page_size)) {
 		page_size = hdr->page_size;
 		page_mask = page_size - 1;
 	}
@@ -519,7 +503,8 @@ int boot_linux_from_mmc(void)
 		second_actual = ROUND_TO_PAGE(hdr->second_size, page_mask);
 		dt_actual = ROUND_TO_PAGE(hdr->ramdisk_size, page_mask);
 		#endif
-		imagesize_actual = (page_size + kernel_actual + ramdisk_actual + second_actual + dt_actual);
+		imagesize_actual = (page_size + kernel_actual + ramdisk_actual + second_actual +
+							dt_actual);
 
 		offset = 0;
 
@@ -541,7 +526,10 @@ int boot_linux_from_mmc(void)
 		}
 		else
 		{
-			auth_kernel_img = image_verify((unsigned char *)image_addr,(unsigned char *)(image_addr + imagesize_actual),imagesize_actual,CRYPTO_AUTH_ALG_SHA256);
+			auth_kernel_img = image_verify((unsigned char *)image_addr,
+					(unsigned char *)(image_addr + imagesize_actual),
+					imagesize_actual,
+					CRYPTO_AUTH_ALG_SHA256);
 
 			if(auth_kernel_img)
 			{
@@ -555,8 +543,7 @@ int boot_linux_from_mmc(void)
 		memmove((void*) hdr->ramdisk_addr, (char *)(image_addr + page_size + kernel_actual), hdr->ramdisk_size);
 
 		#if DEVICE_TREE
-		if(hdr->dt_size) 
-		{
+		if(hdr->dt_size) {
 			table = (struct dt_table*) dt_buf;
 			dt_table_offset = (image_addr + page_size + kernel_actual + ramdisk_actual + second_actual);
 
@@ -566,15 +553,13 @@ int boot_linux_from_mmc(void)
 			ASSERT(((table->num_entries * sizeof(struct dt_entry))+ DEV_TREE_HEADER_SIZE) < hdr->page_size);
 
 			/* Validate the device tree table header */
-			if((table->magic != DEV_TREE_MAGIC) && (table->version != DEV_TREE_VERSION)) 
-			{
+			if((table->magic != DEV_TREE_MAGIC) && (table->version != DEV_TREE_VERSION)) {
 				dprintf(CRITICAL, "ERROR: Cannot validate Device Tree Table \n");
 				return -1;
 			}
 
 			/* Find index of device tree within device tree table */
-			if((dt_entry_ptr = get_device_tree_ptr(table)) == NULL)
-			{
+			if((dt_entry_ptr = get_device_tree_ptr(table)) == NULL){
 				dprintf(CRITICAL, "ERROR: Device Tree Blob cannot be found\n");
 				return -1;
 			}
@@ -600,8 +585,7 @@ int boot_linux_from_mmc(void)
 		offset += page_size;
 
 		n = ROUND_TO_PAGE(hdr->kernel_size, page_mask);
-		if (mmc_read(ptn + offset, (void *)hdr->kernel_addr, n)) 
-		{
+		if (mmc_read(ptn + offset, (void *)hdr->kernel_addr, n)) {
 			dprintf(CRITICAL, "ERROR: Cannot read kernel image\n");
 					return -1;
 		}
@@ -610,27 +594,23 @@ int boot_linux_from_mmc(void)
 		n = ROUND_TO_PAGE(hdr->ramdisk_size, page_mask);
 		if(n != 0)
 		{
-			if (mmc_read(ptn + offset, (void *)hdr->ramdisk_addr, n)) 
-			{
+			if (mmc_read(ptn + offset, (void *)hdr->ramdisk_addr, n)) {
 				dprintf(CRITICAL, "ERROR: Cannot read ramdisk image\n");
 				return -1;
 			}
 		}
 		offset += n;
 
-		if(hdr->second_size != 0) 
-		{
+		if(hdr->second_size != 0) {
 			n = ROUND_TO_PAGE(hdr->second_size, page_mask);
 			offset += n;
 		}
 
 		#if DEVICE_TREE
-		if(hdr->dt_size != 0) 
-		{
+		if(hdr->dt_size != 0) {
 
 			/* Read the device tree table into buffer */
-			if(mmc_read(ptn + offset,(unsigned int *) dt_buf, page_size)) 
-			{
+			if(mmc_read(ptn + offset,(unsigned int *) dt_buf, page_size)) {
 				dprintf(CRITICAL, "ERROR: Cannot read the Device Tree Table\n");
 				return -1;
 			}
@@ -640,23 +620,21 @@ int boot_linux_from_mmc(void)
 			ASSERT(((table->num_entries * sizeof(struct dt_entry))+ DEV_TREE_HEADER_SIZE) < hdr->page_size);
 
 			/* Validate the device tree table header */
-			if((table->magic != DEV_TREE_MAGIC) && (table->version != DEV_TREE_VERSION)) 
-			{
+			if((table->magic != DEV_TREE_MAGIC) && (table->version != DEV_TREE_VERSION)) {
 				dprintf(CRITICAL, "ERROR: Cannot validate Device Tree Table \n");
 				return -1;
 			}
 
 			/* Calculate the offset of device tree within device tree table */
-			if((dt_entry_ptr = get_device_tree_ptr(table)) == NULL)
-			{
+			if((dt_entry_ptr = get_device_tree_ptr(table)) == NULL){
 				dprintf(CRITICAL, "ERROR: Getting device tree address failed\n");
 				return -1;
 			}
 
 			/* Read device device tree in the "tags_add */
 			hdr->tags_addr = 0x8400000;
-			if(mmc_read(ptn + offset + dt_entry_ptr->offset, (void *)hdr->tags_addr, dt_entry_ptr->size)) 
-			{
+			if(mmc_read(ptn + offset + dt_entry_ptr->offset,
+						 (void *)hdr->tags_addr, dt_entry_ptr->size)) {
 				dprintf(CRITICAL, "ERROR: Cannot read device tree\n");
 				return -1;
 			}
@@ -670,23 +648,17 @@ unified_boot:
 	dprintf(INFO, "ramdisk @ %x (%d bytes)\n", hdr->ramdisk_addr,
 		hdr->ramdisk_size);
 
-	if(hdr->cmdline[0]) 
-	{
+	if(hdr->cmdline[0]) {
 		cmdline = (char*) hdr->cmdline;
-	} 
-	else 
-	{
+	} else {
 		cmdline = DEFAULT_CMDLINE;
 	}
 	dprintf(INFO, "cmdline = '%s'\n", cmdline);
 
 	dprintf(INFO, "\nBooting Linux\n");
-	boot_linux((void *)hdr->kernel_addr, 
-				(unsigned *) hdr->tags_addr,
-				(const char *)cmdline, 
-				board_machtype(),
-				(void *)hdr->ramdisk_addr, 
-				hdr->ramdisk_size);
+	boot_linux((void *)hdr->kernel_addr, (unsigned *) hdr->tags_addr,
+		   (const char *)cmdline, board_machtype(),
+		   (void *)hdr->ramdisk_addr, hdr->ramdisk_size);
 
 	return 0;
 }
@@ -705,11 +677,9 @@ int boot_linux_from_flash(void)
 	unsigned ramdisk_actual;
 	unsigned imagesize_actual;
 
-	if (target_is_emmc_boot()) 
-	{
+	if (target_is_emmc_boot()) {
 		hdr = (struct boot_img_hdr *)EMMC_BOOT_IMG_HEADER_ADDR;
-		if (memcmp(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) 
-		{
+		if (memcmp(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 			dprintf(CRITICAL, "ERROR: Invalid boot image header\n");
 			return -1;
 		}
@@ -717,8 +687,7 @@ int boot_linux_from_flash(void)
 	}
 
 	ptable = flash_get_ptable();
-	if (ptable == NULL) 
-	{
+	if (ptable == NULL) {
 		dprintf(CRITICAL, "ERROR: Partition table not found\n");
 		return -1;
 	}
@@ -726,8 +695,7 @@ int boot_linux_from_flash(void)
 	if(!boot_into_recovery)
 	{
 	        ptn = ptable_find(ptable, "boot");
-	        if (ptn == NULL) 
-	        {
+	        if (ptn == NULL) {
 		        dprintf(CRITICAL, "ERROR: No boot partition found\n");
 		        return -1;
 	        }
@@ -735,27 +703,23 @@ int boot_linux_from_flash(void)
 	else
 	{
 	        ptn = ptable_find(ptable, "recovery");
-	        if (ptn == NULL) 
-	        {
+	        if (ptn == NULL) {
 		        dprintf(CRITICAL, "ERROR: No recovery partition found\n");
 		        return -1;
 	        }
 	}
 
-	if (flash_read(ptn, offset, buf, page_size)) 
-	{
+	if (flash_read(ptn, offset, buf, page_size)) {
 		dprintf(CRITICAL, "ERROR: Cannot read boot image header\n");
 		return -1;
 	}
 
-	if (memcmp(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) 
-	{
+	if (memcmp(hdr->magic, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 		dprintf(CRITICAL, "ERROR: Invalid boot image header\n");
 		return -1;
 	}
 
-	if (hdr->page_size != page_size) 
-	{
+	if (hdr->page_size != page_size) {
 		dprintf(CRITICAL, "ERROR: Invalid boot image pagesize. Device pagesize: %d, Image pagesize: %d\n",page_size,hdr->page_size);
 		return -1;
 	}
@@ -820,16 +784,14 @@ int boot_linux_from_flash(void)
 		offset = page_size;
 
 		n = ROUND_TO_PAGE(hdr->kernel_size, page_mask);
-		if (flash_read(ptn, offset, (void *)hdr->kernel_addr, n)) 
-		{
+		if (flash_read(ptn, offset, (void *)hdr->kernel_addr, n)) {
 			dprintf(CRITICAL, "ERROR: Cannot read kernel image\n");
 			return -1;
 		}
 		offset += n;
 
 		n = ROUND_TO_PAGE(hdr->ramdisk_size, page_mask);
-		if (flash_read(ptn, offset, (void *)hdr->ramdisk_addr, n)) 
-		{
+		if (flash_read(ptn, offset, (void *)hdr->ramdisk_addr, n)) {
 			dprintf(CRITICAL, "ERROR: Cannot read ramdisk image\n");
 			return -1;
 		}
@@ -841,12 +803,9 @@ continue_boot:
 	dprintf(INFO, "ramdisk @ %x (%d bytes)\n", hdr->ramdisk_addr,
 		hdr->ramdisk_size);
 
-	if(hdr->cmdline[0]) 
-	{
+	if(hdr->cmdline[0]) {
 		cmdline = (char*) hdr->cmdline;
-	} 
-	else 
-	{
+	} else {
 		cmdline = DEFAULT_CMDLINE;
 	}
 	dprintf(INFO, "cmdline = '%s'\n", cmdline);
@@ -854,7 +813,9 @@ continue_boot:
 	/* TODO: create/pass atags to kernel */
 
 	dprintf(INFO, "\nBooting Linux\n");
-	boot_linux((void *)hdr->kernel_addr, (void *)hdr->tags_addr,(const char *)cmdline, board_machtype(),(void *)hdr->ramdisk_addr, hdr->ramdisk_size);
+	boot_linux((void *)hdr->kernel_addr, (void *)hdr->tags_addr,
+		   (const char *)cmdline, board_machtype(),
+		   (void *)hdr->ramdisk_addr, hdr->ramdisk_size);
 
 	return 0;
 }
@@ -1028,8 +989,7 @@ void cmd_boot(const char *arg, void *data, unsigned sz)
 	static struct boot_img_hdr hdr;
 	char *ptr = ((char*) data);
 
-	if (sz < sizeof(hdr)) 
-	{
+	if (sz < sizeof(hdr)) {
 		fastboot_fail("invalid bootimage header");
 		return;
 	}
@@ -1039,8 +999,7 @@ void cmd_boot(const char *arg, void *data, unsigned sz)
 	/* ensure commandline is terminated */
 	hdr.cmdline[BOOT_ARGS_SIZE-1] = 0;
 
-	if(target_is_emmc_boot() && hdr.page_size) 
-	{
+	if(target_is_emmc_boot() && hdr.page_size) {
 		page_size = hdr.page_size;
 		page_mask = page_size - 1;
 	}
@@ -1049,8 +1008,7 @@ void cmd_boot(const char *arg, void *data, unsigned sz)
 	ramdisk_actual = ROUND_TO_PAGE(hdr.ramdisk_size, page_mask);
 
 	/* sz should have atleast raw boot image */
-	if (page_size + kernel_actual + ramdisk_actual > sz) 
-	{
+	if (page_size + kernel_actual + ramdisk_actual > sz) {
 		fastboot_fail("incomplete bootimage");
 		return;
 	}
@@ -1061,7 +1019,9 @@ void cmd_boot(const char *arg, void *data, unsigned sz)
 	fastboot_okay("");
 	udc_stop();
 
-	boot_linux((void*) hdr.kernel_addr, (void*) hdr.tags_addr, (const char*) hdr.cmdline, board_machtype(), (void*) hdr.ramdisk_addr, hdr.ramdisk_size);
+	boot_linux((void*) hdr.kernel_addr, (void*) hdr.tags_addr,
+		   (const char*) hdr.cmdline, board_machtype(),
+		   (void*) hdr.ramdisk_addr, hdr.ramdisk_size);
 }
 
 void cmd_erase(const char *arg, void *data, unsigned sz)
@@ -1070,21 +1030,18 @@ void cmd_erase(const char *arg, void *data, unsigned sz)
 	struct ptable *ptable;
 
 	ptable = flash_get_ptable();
-	if (ptable == NULL) 
-	{
+	if (ptable == NULL) {
 		fastboot_fail("partition table doesn't exist");
 		return;
 	}
 
 	ptn = ptable_find(ptable, arg);
-	if (ptn == NULL) 
-	{
+	if (ptn == NULL) {
 		fastboot_fail("unknown partition name");
 		return;
 	}
 
-	if (flash_erase(ptn)) 
-	{
+	if (flash_erase(ptn)) {
 		fastboot_fail("failed to erase partition");
 		return;
 	}
@@ -1101,15 +1058,13 @@ void cmd_erase_mmc(const char *arg, void *data, unsigned sz)
 	index = partition_get_index(arg);
 	ptn = partition_get_offset(index);
 
-	if(ptn == 0) 
-	{
+	if(ptn == 0) {
 		fastboot_fail("Partition table doesn't exist\n");
 		return;
 	}
 	/* Simple inefficient version of erase. Just writing
        0 in first block */
-	if (mmc_write(ptn , 512, (unsigned int *)out)) 
-	{
+	if (mmc_write(ptn , 512, (unsigned int *)out)) {
 		fastboot_fail("failed to erase partition");
 		return;
 	}
@@ -1126,8 +1081,7 @@ void cmd_flash_mmc_img(const char *arg, void *data, unsigned sz)
 	if (!strcmp(arg, "partition"))
 	{
 		dprintf(INFO, "Attempt to write partition image.\n");
-		if (write_partition(sz, (unsigned char *) data)) 
-		{
+		if (write_partition(sz, (unsigned char *) data)) {
 			fastboot_fail("failed to write partition");
 			return;
 		}
@@ -1136,29 +1090,24 @@ void cmd_flash_mmc_img(const char *arg, void *data, unsigned sz)
 	{
 		index = partition_get_index(arg);
 		ptn = partition_get_offset(index);
-		if(ptn == 0) 
-		{
+		if(ptn == 0) {
 			fastboot_fail("partition table doesn't exist");
 			return;
 		}
 
-		if (!strcmp(arg, "boot") || !strcmp(arg, "recovery")) 
-		{
-			if (memcmp((void *)data, BOOT_MAGIC, BOOT_MAGIC_SIZE)) 
-			{
+		if (!strcmp(arg, "boot") || !strcmp(arg, "recovery")) {
+			if (memcmp((void *)data, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 				fastboot_fail("image is not a boot image");
 				return;
 			}
 		}
 
 		size = partition_get_size(index);
-		if (ROUND_TO_PAGE(sz,511) > size) 
-		{
+		if (ROUND_TO_PAGE(sz,511) > size) {
 			fastboot_fail("size too large");
 			return;
 		}
-		else if (mmc_write(ptn , sz, (unsigned int *)data)) 
-		{
+		else if (mmc_write(ptn , sz, (unsigned int *)data)) {
 			fastboot_fail("flash write failure");
 			return;
 		}
@@ -1180,15 +1129,13 @@ void cmd_flash_mmc_sparse_img(const char *arg, void *data, unsigned sz)
 
 	index = partition_get_index(arg);
 	ptn = partition_get_offset(index);
-	if(ptn == 0) 
-	{
+	if(ptn == 0) {
 		fastboot_fail("partition table doesn't exist");
 		return;
 	}
 
 	size = partition_get_size(index);
-	if (ROUND_TO_PAGE(sz,511) > size) 
-	{
+	if (ROUND_TO_PAGE(sz,511) > size) {
 		fastboot_fail("size too large");
 		return;
 	}
@@ -1245,7 +1192,9 @@ void cmd_flash_mmc_sparse_img(const char *arg, void *data, unsigned sz)
 				return;
 			}
 
-			if(mmc_write(ptn + ((uint64_t)total_blocks*sparse_header->blk_sz), chunk_data_sz, (unsigned int*)data))
+			if(mmc_write(ptn + ((uint64_t)total_blocks*sparse_header->blk_sz),
+						chunk_data_sz,
+						(unsigned int*)data))
 			{
 				fastboot_fail("flash write failure");
 				return;
@@ -1274,7 +1223,8 @@ void cmd_flash_mmc_sparse_img(const char *arg, void *data, unsigned sz)
 		}
 	}
 
-	dprintf(INFO, "Wrote %d blocks, expected to write %d blocks\n", total_blocks, sparse_header->total_blks);
+	dprintf(INFO, "Wrote %d blocks, expected to write %d blocks\n",
+					total_blocks, sparse_header->total_blks);
 
 	if(total_blocks != sparse_header->total_blks)
 	{
@@ -1292,24 +1242,24 @@ void cmd_flash_mmc(const char *arg, void *data, unsigned sz)
 	unsigned int *magic_number = (unsigned int *) data;
 	int ret=0;
 
-	if (magic_number[0] == DECRYPT_MAGIC_0 && magic_number[1] == DECRYPT_MAGIC_1)
+	if (magic_number[0] == DECRYPT_MAGIC_0 &&
+		magic_number[1] == DECRYPT_MAGIC_1)
 	{
 #ifdef SSD_ENABLE
 		ret = decrypt_scm((uint32 **) &data, &sz);
 #endif
-		if (ret != 0) 
-		{
+		if (ret != 0) {
 			dprintf(CRITICAL, "ERROR: Invalid secure image\n");
 			return;
 		}
 	}
-	else if (magic_number[0] == ENCRYPT_MAGIC_0 && magic_number[1] == ENCRYPT_MAGIC_1)
+	else if (magic_number[0] == ENCRYPT_MAGIC_0 &&
+			 magic_number[1] == ENCRYPT_MAGIC_1)
 	{
 #ifdef SSD_ENABLE
 		ret = encrypt_scm((uint32 **) &data, &sz);
 #endif
-		if (ret != 0) 
-		{
+		if (ret != 0) {
 			dprintf(CRITICAL, "ERROR: Encryption Failure\n");
 			return;
 		}
@@ -1330,23 +1280,19 @@ void cmd_flash(const char *arg, void *data, unsigned sz)
 	unsigned extra = 0;
 
 	ptable = flash_get_ptable();
-	if (ptable == NULL) 
-	{
+	if (ptable == NULL) {
 		fastboot_fail("partition table doesn't exist");
 		return;
 	}
 
 	ptn = ptable_find(ptable, arg);
-	if (ptn == NULL) 
-	{
+	if (ptn == NULL) {
 		fastboot_fail("unknown partition name");
 		return;
 	}
 
-	if (!strcmp(ptn->name, "boot") || !strcmp(ptn->name, "recovery")) 
-	{
-		if (memcmp((void *)data, BOOT_MAGIC, BOOT_MAGIC_SIZE)) 
-		{
+	if (!strcmp(ptn->name, "boot") || !strcmp(ptn->name, "recovery")) {
+		if (memcmp((void *)data, BOOT_MAGIC, BOOT_MAGIC_SIZE)) {
 			fastboot_fail("image is not a boot image");
 			return;
 		}
@@ -1355,20 +1301,17 @@ void cmd_flash(const char *arg, void *data, unsigned sz)
 	if (!strcmp(ptn->name, "system")
 		|| !strcmp(ptn->name, "userdata")
 		|| !strcmp(ptn->name, "persist")
-		|| !strcmp(ptn->name, "recoveryfs")) 
-	{
+		|| !strcmp(ptn->name, "recoveryfs")) {
 		if (flash_ecc_bch_enabled())
 			/* Spare data bytes for 8 bit ECC increased by 4 */
 			extra = ((page_size >> 9) * 20);
 		else
 			extra = ((page_size >> 9) * 16);
-	} 
-	else
+	} else
 		sz = ROUND_TO_PAGE(sz, page_mask);
 
 	dprintf(INFO, "writing %d bytes to '%s'\n", sz, ptn->name);
-	if (flash_write(ptn, extra, data, sz)) 
-	{
+	if (flash_write(ptn, extra, data, sz)) {
 		fastboot_fail("flash write failure");
 		return;
 	}
@@ -1433,24 +1376,19 @@ void splash_screen ()
 	if (!target_is_emmc_boot())
 	{
 		ptable = flash_get_ptable();
-		if (ptable == NULL) 
-		{
+		if (ptable == NULL) {
 			dprintf(CRITICAL, "ERROR: Partition table not found\n");
 			return;
 		}
 
 		ptn = ptable_find(ptable, "splash");
-		if (ptn == NULL) 
-		{
+		if (ptn == NULL) {
 			dprintf(CRITICAL, "ERROR: No splash partition found\n");
-		} 
-		else 
-		{
+		} else {
 			fb_display = fbcon_display();
-			if (fb_display) 
-			{
-				if (flash_read(ptn, 0, fb_display->base,(fb_display->width * fb_display->height * fb_display->bpp/8))) 
-				{
+			if (fb_display) {
+				if (flash_read(ptn, 0, fb_display->base,
+					(fb_display->width * fb_display->height * fb_display->bpp/8))) {
 					fbcon_clear();
 					dprintf(CRITICAL, "ERROR: Cannot read splash image\n");
 				}
@@ -1481,12 +1419,17 @@ void aboot_init(const struct app_descriptor *app)
 	if(target_use_signed_kernel())
 	{
 		read_device_info(&device);
+
 	}
 
 	target_serialno((unsigned char *) sn_buf);
 	dprintf(SPEW,"serial number: %s\n",sn_buf);
 	surf_udc_device.serialno = sn_buf;
-
+	
+	pmic8058_vib_set(28,1);
+	mdelay(50);
+	pmic8058_vib_set(28,0);		
+	
 	/* Check if we should do something other than booting up */
 	if ((keys_get_state(KEY_VOLUMEDOWN) != 0) && (keys_get_state(KEY_VOLUMEUP) != 0))
 		goto fastboot;
@@ -1625,7 +1568,8 @@ struct dt_entry * get_device_tree_ptr(struct dt_table *table)
 	return NULL;
 }
 
-int update_device_tree(const void * fdt, char *cmdline, void *ramdisk, unsigned ramdisk_size)
+int update_device_tree(const void * fdt, char *cmdline,
+					   void *ramdisk, unsigned ramdisk_size)
 {
 	int ret = 0;
 	int offset;

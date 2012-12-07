@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2008, Google Inc.
- * All rights reserved.
+ * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -11,9 +10,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- *  * Neither the name of Google, Inc. nor the names of its contributors
- *    may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -29,39 +25,33 @@
  * SUCH DAMAGE.
  */
 
-#include <bits.h>
-#include <debug.h>
-#include <string.h>
-#include <dev/keys.h>
+#include <sys/types.h>
+#include <platform/timer.h>
+#include <dev/gpio.h>
 
-static unsigned long key_bitmap[BITMAP_NUM_WORDS(MAX_KEYS)];
-
-void keys_init(void)
+void spi_bit_bang_write(uint8_t spi_sclk, uint8_t spi_mosi, uint8_t dc, uint8_t data)
 {
-	memset(key_bitmap, 0, sizeof(key_bitmap));
-}
+	uint8_t bit;
+	uint8_t bnum;
 
-void keys_post_event(uint16_t code, int16_t value)
-{
-	if (code >= MAX_KEYS) {
-		dprintf(INFO, "Invalid keycode posted: %d\n", code);
-		return;
+	gpio_set(spi_sclk, 0); /* clk low */
+	/* dc: 0 for command, 1 for parameter */
+	gpio_set(spi_mosi, dc);
+	udelay(1);	/* at least 20 ns */
+	gpio_set(spi_sclk, 1); /* clk high */
+	udelay(1);	/* at least 20 ns */
+	bnum = 8;	/* 8 data bits */
+	bit = 0x80;
+	while(bnum){
+		gpio_set(spi_sclk, 0); /* clk low */
+		if (data & bit)
+			gpio_set(spi_mosi, 1);
+		else
+			gpio_set(spi_mosi, 0);
+		udelay(1);
+		gpio_set(spi_sclk, 1); /* clk high */
+		udelay(1);
+		bit >>= 1;
+		bnum--;
 	}
-
-	/* TODO: Implement an actual event queue if it becomes necessary */
-	if (value)
-		bitmap_set(key_bitmap, code);
-	else
-		bitmap_clear(key_bitmap, code);
-
-//	dprintf(INFO, "key state change: %d %d\n", code, value);
-}
-
-int keys_get_state(uint16_t code)
-{
-	if (code >= MAX_KEYS) {
-		dprintf(INFO, "Invalid keycode requested: %d\n", code);
-		return -1;
-	}
-	return bitmap_test(key_bitmap, code);
 }

@@ -46,7 +46,8 @@ static void platform_detect()
 	unsigned ret = 0;
 	unsigned format = 0;
 
-	ret = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION, &format, sizeof(format), 0);
+	ret = smem_read_alloc_entry_offset(SMEM_BOARD_INFO_LOCATION,
+						   &format, sizeof(format), 0);
 	if (ret)
 		return;
 
@@ -54,7 +55,9 @@ static void platform_detect()
 	{
 			board_info_len = sizeof(board_info_v6);
 
-		ret = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v6, board_info_len);
+		ret = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+				&board_info_v6,
+				board_info_len);
 		if (ret)
 			return;
 
@@ -66,7 +69,9 @@ static void platform_detect()
 	{
 		board_info_len = sizeof(board_info_v7);
 
-		ret = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION, &board_info_v7, board_info_len);
+		ret = smem_read_alloc_entry(SMEM_BOARD_INFO_LOCATION,
+				&board_info_v7,
+				board_info_len);
 		if (ret)
 			return;
 

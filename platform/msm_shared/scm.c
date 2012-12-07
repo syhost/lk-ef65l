@@ -58,8 +58,7 @@ static struct scm_command *alloc_scm_command(size_t cmd_size, size_t resp_size)
 	    resp_size;
 
 	cmd = malloc(len);
-	if (cmd) 
-	{
+	if (cmd) {
 		cmd->len = len;
 		cmd->buf_offset = offsetof(struct scm_command, buf);
 		cmd->resp_hdr_offset = cmd->buf_offset + cmd_size;
@@ -84,7 +83,8 @@ static inline void free_scm_command(struct scm_command *cmd)
  *
  * Returns a pointer to a response for a command.
  */
-static inline struct scm_response *scm_command_to_response(const struct scm_command *cmd)
+static inline struct scm_response *scm_command_to_response(const struct
+							   scm_command *cmd)
 {
 	return (void *)cmd + cmd->resp_hdr_offset;
 }
@@ -132,7 +132,9 @@ static uint32_t smc(uint32_t cmd_addr)
  *
  * Sends a command to the SCM and waits for the command to finish processing.
  */
-int scm_call(uint32_t svc_id, uint32_t cmd_id, const void *cmd_buf, size_t cmd_len, void *resp_buf, size_t resp_len)
+int
+scm_call(uint32_t svc_id, uint32_t cmd_id, const void *cmd_buf,
+	 size_t cmd_len, void *resp_buf, size_t resp_len)
 {
 	int ret;
 	struct scm_command *cmd;
@@ -155,8 +157,7 @@ int scm_call(uint32_t svc_id, uint32_t cmd_id, const void *cmd_buf, size_t cmd_l
 	if (ret)
 		goto out;
 
-	if (resp_len) 
-	{
+	if (resp_len) {
 		rsp = scm_command_to_response(cmd);
 
 		do
